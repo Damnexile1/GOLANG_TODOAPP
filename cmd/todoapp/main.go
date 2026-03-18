@@ -8,8 +8,11 @@ import (
 	"syscall"
 
 	core_logger "github.com/Damnexile1/GOLANG_TODOAPP/internal/core/logger"
+	core_postgres_pool "github.com/Damnexile1/GOLANG_TODOAPP/internal/core/repository/postgres/pool"
 	core_http_middleware "github.com/Damnexile1/GOLANG_TODOAPP/internal/core/transport/http/middleware"
 	core_http_server "github.com/Damnexile1/GOLANG_TODOAPP/internal/core/transport/http/server"
+	users_postgres_repository "github.com/Damnexile1/GOLANG_TODOAPP/internal/features/users/repository/postgres"
+	user_service "github.com/Damnexile1/GOLANG_TODOAPP/internal/features/users/service"
 	user_transport_http "github.com/Damnexile1/GOLANG_TODOAPP/internal/features/users/transport/http"
 	"go.uber.org/zap"
 )
@@ -25,20 +28,34 @@ func main() {
 	}
 	defer logger.Close()
 
-	logger.Debug("starting server")
-	usersTransportHTTP := user_transport_http.NewUsersHTTPHandler(nil)
-	userRoutes := usersTransportHTTP.Routes()
-	apiVersionRouter := core_http_server.NewApiVersionRouter(core_http_server.ApiVersion1)
-	apiVersionRouter.RegisterRoutes(userRoutes...)
+	logger.Debug("initializing postgres connection pool")
+	pool, err := core_postgres_pool.NewConnectionPool(
+		ctx,
+		core_postgres_pool.NewConfigMust(),
+	)
+	if err != nil {
+		logger.Fatal("failed to init connection poo: ", zap.Error(err))
+	}
+
+	defer pool.Close()
+
+	logger.Debug("initializing feature", zap.String("feature", "users"))
+	usersRepository := users_postgres_repository.NewUsersRepository(pool)
+	usersService := user_service.NewUsersService(usersRepository)
+	usersTransportHTTP := user_transport_http.NewUsersHTTPHandler(usersService)
+
+	logger.Debug("initializing http server")
+
 	httpServer := core_http_server.NewHTTPServer(
 		core_http_server.NewConfigMust(),
 		logger,
-		// XXX: middlewares
 		core_http_middleware.RequestId(),
 		core_http_middleware.Logger(logger),
-		core_http_middleware.Panic(),
+		core_http_middleware.Panic(logger),
 		core_http_middleware.Trace(),
 	)
+	apiVersionRouter := core_http_server.NewApiVersionRouter(core_http_server.ApiVersion1)
+	apiVersionRouter.RegisterRoutes(usersTransportHTTP.Routes()...)
 	httpServer.RegisterApiRoutes(apiVersionRouter)
 
 	if err := httpServer.Run(ctx); err != nil {

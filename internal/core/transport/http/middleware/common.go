@@ -2,6 +2,7 @@ package core_http_middleware
 
 import (
 	"net/http"
+	"runtime/debug"
 	"time"
 
 	core_logger "github.com/Damnexile1/GOLANG_TODOAPP/internal/core/logger"
@@ -11,18 +12,18 @@ import (
 )
 
 const (
-	requestIdHeader = "X-Request-Id"
+	requestIDHeader = "X-Request-ID"
 )
 
 func RequestId() Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			requestId := r.Header.Get(requestIdHeader)
+			requestId := r.Header.Get(requestIDHeader)
 			if requestId == "" {
 				requestId = uuid.NewString()
 			}
-			r.Header.Set(requestIdHeader, requestId)
-			w.Header().Set(requestIdHeader, requestId)
+			r.Header.Set(requestIDHeader, requestId)
+			w.Header().Set(requestIDHeader, requestId)
 
 			next.ServeHTTP(w, r)
 		})
@@ -32,7 +33,7 @@ func RequestId() Middleware {
 func Logger(log *core_logger.Logger) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			requestId := r.Header.Get(requestIdHeader)
+			requestId := r.Header.Get(requestIDHeader)
 			l := log.With(
 				zap.String("requestId", requestId),
 				zap.String("url", r.URL.String()),
@@ -45,15 +46,19 @@ func Logger(log *core_logger.Logger) Middleware {
 	}
 }
 
-func Panic() Middleware {
+func Panic(log *core_logger.Logger) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ctx := r.Context()
-			log := core_logger.FromContext(ctx)
 			responseHandler := core_http_response.NewHTTPResponseHandler(log, w)
 
 			defer func() {
 				if p := recover(); p != nil {
+					log.Error(
+						"panic recovered",
+						zap.Any("panic", p),
+						zap.ByteString("stack", debug.Stack()),
+					)
+
 					responseHandler.PanicResponse(
 						p,
 						"during handle HTTP request got unexpected panic",
@@ -76,6 +81,7 @@ func Trace() Middleware {
 			before := time.Now()
 			log.Debug(
 				">>> handling HTTP request",
+				zap.String("method", r.Method),
 				zap.Time("time", before.UTC()),
 			)
 
