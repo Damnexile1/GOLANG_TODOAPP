@@ -21,6 +21,16 @@ type UserRepository interface {
 		limit *int,
 		offset *int,
 	) ([]domain.User, error)
+
+	GetUser(
+		ctx context.Context,
+		userId int,
+	) (domain.User, error)
+
+	DeleteUser(
+		ctx context.Context,
+		userId int,
+	) error
 }
 
 func NewUsersService(usersRepository UserRepository) *UserService {

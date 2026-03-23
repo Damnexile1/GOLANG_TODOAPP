@@ -11,7 +11,7 @@ import (
 
 type GetUsersResponse []UserDTOResponse
 
-func (h *UsersHttpHandler) getUsers(rw http.ResponseWriter, req *http.Request) {
+func (h *UsersHttpHandler) GetUsers(rw http.ResponseWriter, req *http.Request) {
 	ctx := req.Context()
 	log := core_logger.FromContext(ctx)
 	responseHandler := core_http_response.NewHTTPResponseHandler(log, rw)
