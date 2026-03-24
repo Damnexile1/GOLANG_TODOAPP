@@ -65,3 +65,9 @@ migrate-action:
 todoapp-run:
 	go mod tidy && \
 	go run cmd/todoapp/main.go
+
+up:
+	make env-up
+	make env-port-forward
+	sudo chmod -R 777 /out
+	make todoapp-run
