@@ -15,6 +15,11 @@ type User struct {
 	PhoneNumber *string
 }
 
+type UserPatch struct {
+	FullName    Nullable[string]
+	PhoneNumber Nullable[string]
+}
+
 func NewUser(id int, version int, fullName string, phoneNumber *string) User {
 	return User{
 		ID:          id,
@@ -31,6 +36,14 @@ func NewUserUninitialized(fullName string, phoneNumber *string) User {
 		fullName,
 		phoneNumber,
 	)
+}
+
+func (p *UserPatch) Validate() error {
+	if p.FullName.Set && p.FullName.Value == nil {
+		return fmt.Errorf("UserPatch: full name must be not null: %w", core_errors.ErrInvalidArgument)
+	}
+
+	return nil
 }
 
 func (u *User) Validate() error {
@@ -57,5 +70,28 @@ func (u *User) Validate() error {
 			return fmt.Errorf("invalid phone number: %s: %w", *u.PhoneNumber, core_errors.ErrInvalidArgument)
 		}
 	}
+	return nil
+}
+
+func (u *User) ApplyPatch(patch UserPatch) error {
+	if err := patch.Validate(); err != nil {
+		return fmt.Errorf("validate user patch: %w", err)
+	}
+
+	tmp := *u
+
+	if patch.FullName.Set {
+		tmp.FullName = *patch.FullName.Value
+	}
+
+	if patch.PhoneNumber.Set {
+		tmp.PhoneNumber = patch.PhoneNumber.Value
+	}
+
+	if err := tmp.Validate(); err != nil {
+		return fmt.Errorf("validate user patch: %w", err)
+	}
+
+	*u = tmp
 	return nil
 }
