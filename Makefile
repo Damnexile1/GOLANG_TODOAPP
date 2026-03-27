@@ -11,7 +11,7 @@ env-down:
 	@docker compose down todoapp-postgres
 
 env-cleanup:
-	@read -p "Очистить все volume файлы окружения? Опасность утери данныхю [y/N]: " ans; \
+	@read -p "Очистить все volume файлы окружения? Опасность утери данных [y/N]: " ans; \
 	if [ "$$ans" = "y" ]; then \
 	  docker compose down todoapp-postgres port-forwarder&& \
 
@@ -62,12 +62,21 @@ migrate-action:
 	    -database "postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@todoapp-postgres:5432/$(POSTGRES_DB)?sslmode=disable" \
 	    $(action)
 
+log-cleanup:
+	@read -p "Очистить все log файлы? Опасность утери логов [y/N]: " ans; \
+	if [ "$$ans" = "y" ]; then \
+	  sudo rm -rf out/logs &&\
+	  echo "Файлы логов очищены"; \
+	else \
+		echo "Очистка отменена"; \
+	fi
+
 todoapp-run:
 	go mod tidy && \
 	go run cmd/todoapp/main.go
 
 up:
-	make env-up
-	make env-port-forward
-	sudo chmod -R 777 /out
+	make env-up && \
+	make env-port-forward && \
+	sudo chmod -R 777 /out && \
 	make todoapp-run
