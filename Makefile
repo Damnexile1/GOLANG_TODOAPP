@@ -75,8 +75,16 @@ todoapp-run:
 	go mod tidy && \
 	go run cmd/todoapp/main.go
 
+
+#Only for local development
 up:
 	make env-up && \
 	make env-port-forward && \
 	sudo chmod -R 777 /out && \
 	make todoapp-run
+
+todoapp-deploy:
+	@docker compose up -d --build todoapp
+
+todoapp-undeploy:
+	@docker compose down todoapp
