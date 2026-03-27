@@ -22,11 +22,25 @@ type TasksRepository interface {
 		limit *int,
 		offset *int,
 	) ([]domain.Task, error)
+
+	GetTaskById(
+		ctx context.Context,
+		taskId int,
+	) (domain.Task, error)
+
+	DeleteTask(
+		ctx context.Context,
+		taskId int,
+	) error
+
+	PatchTask(
+		ctx context.Context,
+		taskId int,
+		task domain.Task,
+	) (domain.Task, error)
 }
 
-func NewTasksService(
-	tasksRepository TasksRepository,
-) *TasksService {
+func NewTasksService(tasksRepository TasksRepository) *TasksService {
 	return &TasksService{
 		tasksRepository: tasksRepository,
 	}

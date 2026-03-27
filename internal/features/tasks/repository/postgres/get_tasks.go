@@ -7,7 +7,7 @@ import (
 	"github.com/Damnexile1/GOLANG_TODOAPP/internal/core/domain"
 )
 
-func (r *TaskRepository) GetTasks(
+func (r *TasksRepository) GetTasks(
 	ctx context.Context,
 	userId *int,
 	limit *int,

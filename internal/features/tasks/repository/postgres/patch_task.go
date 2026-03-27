@@ -10,28 +10,42 @@ import (
 	core_postgres_pool "github.com/Damnexile1/GOLANG_TODOAPP/internal/core/repository/postgres/pool"
 )
 
-func (r *TasksRepository) Create(
+func (r *TasksRepository) PatchTask(
 	ctx context.Context,
+	taskId int,
 	task domain.Task,
 ) (domain.Task, error) {
 	ctx, cancel := context.WithTimeout(ctx, r.pool.OpTimeout())
 	defer cancel()
 
 	query := `
-	insert into todoapp.tasks (title, description, completed, created_at, completed_at, author_user_id)
-	values ($1, $2, $3, $4, $5, $6)
-	returning id, version, title, description, completed, created_at, completed_at, author_user_id;
-	`
+	update todoapp.tasks
+	set 
+	    title = $1,
+	    description = $2,
+	    completed = $3,
+	    completed_at = $4,
+	    version = version + 1
+	where id = $5 and version = $6
+	returning 
+		id,
+		version,
+		title,
+		description,
+		completed,
+		created_at,
+		completed_at,
+		author_user_id
+	;
+    `
 
-	row := r.pool.QueryRow(
-		ctx,
-		query,
+	row := r.pool.QueryRow(ctx, query,
 		task.Title,
 		task.Description,
 		task.Completed,
-		task.CreatedAt,
 		task.CompletedAt,
-		task.AuthorUserId,
+		task.ID,
+		task.Version,
 	)
 	var taskModel TaskModel
 	err := row.Scan(
@@ -45,13 +59,15 @@ func (r *TasksRepository) Create(
 		&taskModel.AuthorUserId,
 	)
 	if err != nil {
-		if errors.Is(err, core_postgres_pool.ErrViolatesForeignKey) {
-			return domain.Task{}, fmt.Errorf("%v: user with id=%d: %w",
-				err, taskModel.AuthorUserId, core_errors.ErrNotFound)
+		if errors.Is(err, core_postgres_pool.ErrNoRows) {
+			return domain.Task{}, fmt.Errorf(
+				"task with id = %d concurrently accessed: %w",
+				taskId,
+				core_errors.ErrConflict,
+			)
 		}
-		return domain.Task{}, fmt.Errorf("scan error %w", err)
+		return domain.Task{}, fmt.Errorf("scan failed: %w", err)
 	}
-
 	taskDomain := domain.Task{
 		ID:           taskModel.ID,
 		Version:      taskModel.Version,
@@ -62,6 +78,5 @@ func (r *TasksRepository) Create(
 		CompletedAt:  taskModel.CompletedAt,
 		AuthorUserId: taskModel.AuthorUserId,
 	}
-
 	return taskDomain, nil
 }
