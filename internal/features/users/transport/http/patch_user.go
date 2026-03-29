@@ -19,6 +19,18 @@ type PatchUserRequest struct {
 
 type PatchUserResponse UserDTOResponse
 
+// Validate PatchUser godoc
+// @Summary Частичное обновление пользователя
+// @Description Частично обновляет данные пользователя по идентификатору
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param id path int true "ID пользователя"
+// @Param request body PatchUserRequest true "Тело запроса для частичного обновления пользователя"
+// @Success 200 {object} PatchUserResponse "Пользователь успешно обновлен"
+// @Failure 400 {object} core_http_response.ErrorResponse "Bad Request"
+// @Failure 500 {object} core_http_response.ErrorResponse "Internal Server Error"
+// @Router /users/{id} [patch]
 func (r *PatchUserRequest) Validate() error {
 	if r.FullName.Set {
 		if r.FullName.Value == nil {

@@ -46,6 +46,18 @@ func (r *PatchTaskRequest) Validate() error {
 	return nil
 }
 
+// PatchTask godoc
+// @Summary Частичное обновление задачи
+// @Description Частично обновляет данные задачи по идентификатору
+// @Tags tasks
+// @Accept json
+// @Produce json
+// @Param id path int true "ID задачи"
+// @Param request body PatchTaskRequest true "Тело запроса для частичного обновления задачи"
+// @Success 200 {object} PatchTaskResponse "Задача успешно обновлена"
+// @Failure 400 {object} core_http_response.ErrorResponse "Bad Request"
+// @Failure 500 {object} core_http_response.ErrorResponse "Internal Server Error"
+// @Router /tasks/{id} [patch]
 func (h *TasksHTTPHandler) PatchTask(rw http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	logger := core_logger.FromContext(ctx)
