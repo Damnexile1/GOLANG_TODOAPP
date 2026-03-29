@@ -4,6 +4,7 @@
       <w>Fullname</w>
       <w>dtos</w>
       <w>envconfig</w>
+      <w>godoc</w>
       <w>pgxconfig</w>
       <w>pgxpool</w>
     </words>

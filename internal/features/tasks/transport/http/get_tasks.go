@@ -11,6 +11,18 @@ import (
 
 type GetTasksResponse []TaskDTOResponse
 
+// GetTasks godoc
+// @Summary Получение списка задач
+// @Description Возвращает список задач с возможностью фильтрации по user_id и пагинацией через limit и offset
+// @Tags tasks
+// @Produce json
+// @Param user_id query int false "ID пользователя для фильтрации задач" example(1)
+// @Param limit query int false "Лимит количества задач" example(10)
+// @Param offset query int false "Смещение для пагинации" example(0)
+// @Success 200 {array} TaskDTOResponse "Список задач успешно получен"
+// @Failure 400 {object} core_http_response.ErrorResponse "Bad Request"
+// @Failure 500 {object} core_http_response.ErrorResponse "Internal Server Error"
+// @Router /tasks [get]
 func (h *TasksHTTPHandler) GetTasks(rw http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	logger := core_logger.FromContext(ctx)

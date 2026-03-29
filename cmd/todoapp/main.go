@@ -23,8 +23,14 @@ import (
 	user_service "github.com/Damnexile1/GOLANG_TODOAPP/internal/features/users/service"
 	user_transport_http "github.com/Damnexile1/GOLANG_TODOAPP/internal/features/users/transport/http"
 	"go.uber.org/zap"
+
+	_ "github.com/Damnexile1/GOLANG_TODOAPP/docs"
 )
 
+// @title    Golang To do API
+// @version  1.0
+// @host     127.0.0.1:5050
+// @BasePath /api/v1
 func main() {
 	cfg := core_config.NewConfigMust()
 	time.Local = cfg.TimeZone
@@ -73,6 +79,7 @@ func main() {
 	httpServer := core_http_server.NewHTTPServer(
 		core_http_server.NewConfigMust(),
 		logger,
+		core_http_middleware.CORS(),
 		core_http_middleware.RequestId(),
 		core_http_middleware.Logger(logger),
 		core_http_middleware.Panic(logger),
@@ -94,6 +101,7 @@ func main() {
 		apiVersionRouterV1,
 		//apiVersionRouterV2,
 	)
+	httpServer.RegisterSwagger()
 
 	if err := httpServer.Run(ctx); err != nil {
 		logger.Error("Http server run error", zap.Error(err))

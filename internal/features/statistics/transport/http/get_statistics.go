@@ -17,13 +17,25 @@ type queryParams struct {
 	to     *time.Time
 }
 
-type getStatisticsResponse struct {
-	TasksCreated               int      `json:"tasks_created"`
-	TasksCompleted             int      `json:"tasks_completed"`
-	TasksCompletedRate         *float64 `json:"tasks_completed_rate"`
-	TasksAverageCompletionTime *string  `json:"tasks_average_completion_time"`
+type GetStatisticsResponse struct {
+	TasksCreated               int      `json:"tasks_created" example:"10"`
+	TasksCompleted             int      `json:"tasks_completed" example:"7"`
+	TasksCompletedRate         *float64 `json:"tasks_completed_rate" example:"0.7"`
+	TasksAverageCompletionTime *string  `json:"tasks_average_completion_time" example:"16h10m9.862461s"`
 }
 
+// GetStatistics godoc
+// @Summary Получение статистики
+// @Description Возвращает статистику по задачам с возможностью фильтрации по пользователю и диапазону дат
+// @Tags statistics
+// @Produce json
+// @Param user_id query int false "ID пользователя для фильтрации статистики" example(1)
+// @Param from query string false "Начальная дата периода" example(2026-03-01)
+// @Param to query string false "Конечная дата периода" example(2026-03-29)
+// @Success 200 {object} GetStatisticsResponse "Статистика успешно получена"
+// @Failure 400 {object} core_http_response.ErrorResponse "Bad Request"
+// @Failure 500 {object} core_http_response.ErrorResponse "Internal Server Error"
+// @Router /statistics [get]
 func (h *StatisticsHTTPHandler) GetStatistics(rw http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	logger := core_logger.FromContext(ctx)
@@ -45,14 +57,14 @@ func (h *StatisticsHTTPHandler) GetStatistics(rw http.ResponseWriter, r *http.Re
 	responseHandler.JSONResponse(response, http.StatusOK)
 }
 
-func toDtoFromDomain(statistics domain.Statistics) getStatisticsResponse {
+func toDtoFromDomain(statistics domain.Statistics) GetStatisticsResponse {
 	var avgTime *string
 	if statistics.TasksAverageCompletionTime != nil {
 		duration := statistics.TasksAverageCompletionTime.String()
 		avgTime = &duration
 	}
 
-	return getStatisticsResponse{
+	return GetStatisticsResponse{
 		TasksCreated:               statistics.TasksCreated,
 		TasksCompleted:             statistics.TasksCompleted,
 		TasksCompletedRate:         statistics.TasksCompletedRate,
