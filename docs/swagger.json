@@ -5,7 +5,6 @@
         "contact": {},
         "version": "1.0"
     },
-    "host": "127.0.0.1:5050",
     "basePath": "/api/v1",
     "paths": {
         "/statistics": {
@@ -558,7 +557,7 @@
             "properties": {
                 "tasks_average_completion_time": {
                     "type": "string",
-                    "example": "2h15m0s"
+                    "example": "16h10m9.862461s"
                 },
                 "tasks_completed": {
                     "type": "integer",

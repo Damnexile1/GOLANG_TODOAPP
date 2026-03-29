@@ -26,7 +26,7 @@ definitions:
   internal_features_statistics_transport_http.GetStatisticsResponse:
     properties:
       tasks_average_completion_time:
-        example: 2h15m0s
+        example: 16h10m9.862461s
         type: string
       tasks_completed:
         example: 7
@@ -257,7 +257,6 @@ definitions:
         example: 1
         type: integer
     type: object
-host: 127.0.0.1:5050
 info:
   contact: {}
   title: Golang To do API

@@ -565,7 +565,7 @@ const docTemplate = `{
             "properties": {
                 "tasks_average_completion_time": {
                     "type": "string",
-                    "example": "2h15m0s"
+                    "example": "16h10m9.862461s"
                 },
                 "tasks_completed": {
                     "type": "integer",
@@ -890,7 +890,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "127.0.0.1:5050",
+	Host:             "",
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
 	Title:            "Golang To do API",

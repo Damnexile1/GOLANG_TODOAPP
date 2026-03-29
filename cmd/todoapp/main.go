@@ -29,7 +29,6 @@ import (
 
 // @title    Golang To do API
 // @version  1.0
-// @host     127.0.0.1:5050
 // @BasePath /api/v1
 func main() {
 	cfg := core_config.NewConfigMust()
