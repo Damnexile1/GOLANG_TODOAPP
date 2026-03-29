@@ -1,11 +1,9 @@
 package core_http_middleware
 
 import (
-	"fmt"
 	"net/http"
-	"os"
+	"net/url"
 	"runtime/debug"
-	"strings"
 	"time"
 
 	core_logger "github.com/Damnexile1/GOLANG_TODOAPP/internal/core/logger"
@@ -14,27 +12,24 @@ import (
 	"go.uber.org/zap"
 )
 
-const (
-	requestIDHeader = "X-Request-ID"
-)
+const requestIDHeader = "X-Request-ID"
 
 func CORS() Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			origin := r.Header.Get("Origin")
-			logger, err := core_logger.NewLogger(core_logger.NewConfigMust())
-			if err != nil {
-				fmt.Println("failed to initialize logger", err)
-				os.Exit(1)
-			}
-			defer logger.Close()
 
-			logger.Debug("cors check", zap.String("origin", origin), zap.String("method", r.Method))
 			if isAllowedOrigin(origin) {
 				w.Header().Set("Access-Control-Allow-Origin", origin)
 				w.Header().Set("Vary", "Origin")
 				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS")
-				w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+				requestHeaders := r.Header.Get("Access-Control-Request-Headers")
+				if requestHeaders != "" {
+					w.Header().Set("Access-Control-Allow-Headers", requestHeaders)
+				} else {
+					w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Request-ID, Accept")
+				}
 			}
 
 			if r.Method == http.MethodOptions {
@@ -52,19 +47,23 @@ func isAllowedOrigin(origin string) bool {
 		return false
 	}
 
-	if strings.HasPrefix(origin, "http://localhost:") {
-		return true
+	u, err := url.Parse(origin)
+	if err != nil {
+		return false
 	}
 
-	if strings.HasPrefix(origin, "http://127.0.0.1:") {
-		return true
+	if u.Scheme != "http" && u.Scheme != "https" {
+		return false
 	}
 
-	if strings.HasPrefix(origin, "http://45.131.41.192/:") {
-		return true
-	}
+	host := u.Hostname()
 
-	return false
+	switch host {
+	case "localhost", "127.0.0.1", "45.131.41.192":
+		return true
+	default:
+		return false
+	}
 }
 
 func RequestId() Middleware {
@@ -141,8 +140,8 @@ func Trace() Middleware {
 
 			log.Debug(
 				"<<< finished HTTP request",
-				zap.Int("status_code: ", rw.StatusCode()),
-				zap.Duration("time", time.Now().Sub(before)),
+				zap.Int("status_code", rw.StatusCode()),
+				zap.Duration("time", time.Since(before)),
 			)
 		})
 	}
