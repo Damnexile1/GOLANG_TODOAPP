@@ -3,6 +3,7 @@ package core_http_middleware
 import (
 	"net/http"
 	"runtime/debug"
+	"strings"
 	"time"
 
 	core_logger "github.com/Damnexile1/GOLANG_TODOAPP/internal/core/logger"
@@ -18,26 +19,43 @@ const (
 func CORS() Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			allowedOrigins := map[string]struct{}{
-				//"http://127.0.0.1:5050": {},
-				"http://localhost:*": {},
-			}
 			origin := r.Header.Get("Origin")
 
-			if _, ok := allowedOrigins[origin]; !ok {
+			if isAllowedOrigin(origin) {
 				w.Header().Set("Access-Control-Allow-Origin", origin)
-				w.Header().Set("Access-Control-Allow-Methods", "POST, GET, PATCH, OPTIONS, PUT, DELETE")
+				w.Header().Set("Vary", "Origin")
+				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS")
 				w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 			}
 
 			if r.Method == http.MethodOptions {
-				w.WriteHeader(http.StatusOK)
+				w.WriteHeader(http.StatusNoContent)
 				return
 			}
 
 			next.ServeHTTP(w, r)
 		})
 	}
+}
+
+func isAllowedOrigin(origin string) bool {
+	if origin == "" {
+		return false
+	}
+
+	if strings.HasPrefix(origin, "http://localhost:") {
+		return true
+	}
+
+	if strings.HasPrefix(origin, "http://127.0.0.1:") {
+		return true
+	}
+
+	if strings.HasPrefix(origin, "http://45.131.41.192/:") {
+		return true
+	}
+
+	return false
 }
 
 func RequestId() Middleware {
