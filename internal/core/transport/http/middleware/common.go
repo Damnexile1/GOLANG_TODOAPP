@@ -1,7 +1,9 @@
 package core_http_middleware
 
 import (
+	"fmt"
 	"net/http"
+	"os"
 	"runtime/debug"
 	"strings"
 	"time"
@@ -20,7 +22,14 @@ func CORS() Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			origin := r.Header.Get("Origin")
+			logger, err := core_logger.NewLogger(core_logger.NewConfigMust())
+			if err != nil {
+				fmt.Println("failed to initialize logger", err)
+				os.Exit(1)
+			}
+			defer logger.Close()
 
+			logger.Debug("cors check", zap.String("origin", origin), zap.String("method", r.Method))
 			if isAllowedOrigin(origin) {
 				w.Header().Set("Access-Control-Allow-Origin", origin)
 				w.Header().Set("Vary", "Origin")
