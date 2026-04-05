@@ -3,6 +3,7 @@ package tasks_transport_http
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/Damnexile1/GOLANG_TODOAPP/internal/core/domain"
 	core_logger "github.com/Damnexile1/GOLANG_TODOAPP/internal/core/logger"
@@ -12,9 +13,10 @@ import (
 )
 
 type PatchTaskRequest struct {
-	Title       types.Nullable[string] `json:"title"`
-	Description types.Nullable[string] `json:"description"`
-	Completed   types.Nullable[bool]   `json:"completed"`
+	Title       types.Nullable[string]    `json:"title"`
+	Description types.Nullable[string]    `json:"description"`
+	Completed   types.Nullable[bool]      `json:"completed"`
+	Deadline    types.Nullable[time.Time] `json:"deadline"`
 }
 
 type PatchTaskResponse TaskDTOResponse
@@ -46,6 +48,18 @@ func (r *PatchTaskRequest) Validate() error {
 	return nil
 }
 
+// PatchTask godoc
+// @Summary Частичное обновление задачи
+// @Description Частично обновляет данные задачи по идентификатору
+// @Tags tasks
+// @Accept json
+// @Produce json
+// @Param id path int true "ID задачи"
+// @Param request body PatchTaskRequest true "Тело запроса для частичного обновления задачи"
+// @Success 200 {object} PatchTaskResponse "Задача успешно обновлена"
+// @Failure 400 {object} core_http_response.ErrorResponse "Bad Request"
+// @Failure 500 {object} core_http_response.ErrorResponse "Internal Server Error"
+// @Router /tasks/{id} [patch]
 func (h *TasksHTTPHandler) PatchTask(rw http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	logger := core_logger.FromContext(ctx)
@@ -76,5 +90,6 @@ func taskPatchFromRequest(request PatchTaskRequest) domain.TaskPatch {
 		request.Title.ToDomain(),
 		request.Description.ToDomain(),
 		request.Completed.ToDomain(),
+		request.Deadline.ToDomain(),
 	)
 }

@@ -17,7 +17,7 @@ func (r *TasksRepository) GetTasks(
 	defer cancel()
 
 	query := `
-	select id, version, title, description, completed, created_at, completed_at, author_user_id
+	select id, version, title, description, completed, status_key, deadline, created_at, completed_at, author_user_id
 	from todoapp.tasks
 	%s
 	order by id asc
@@ -47,6 +47,8 @@ func (r *TasksRepository) GetTasks(
 			&taskModel.Title,
 			&taskModel.Description,
 			&taskModel.Completed,
+			&taskModel.StatusKey,
+			&taskModel.Deadline,
 			&taskModel.CreatedAt,
 			&taskModel.CompletedAt,
 			&taskModel.AuthorUserId,

@@ -14,6 +14,8 @@ type Task struct {
 	Title       string
 	Description *string
 	Completed   bool
+	StatusKey   TaskStatus
+	Deadline    *time.Time
 	CreatedAt   time.Time
 	CompletedAt *time.Time
 
@@ -24,6 +26,7 @@ type TaskPatch struct {
 	Title       Nullable[string]
 	Description Nullable[string]
 	Completed   Nullable[bool]
+	Deadline    Nullable[time.Time]
 }
 
 func NewTask(
@@ -32,6 +35,8 @@ func NewTask(
 	title string,
 	description *string,
 	completed bool,
+	statusKey TaskStatus,
+	deadline *time.Time,
 	createdAt time.Time,
 	completedAt *time.Time,
 	authorUserId int,
@@ -42,6 +47,8 @@ func NewTask(
 		Title:        title,
 		Description:  description,
 		Completed:    completed,
+		StatusKey:    statusKey,
+		Deadline:     deadline,
 		CreatedAt:    createdAt,
 		CompletedAt:  completedAt,
 		AuthorUserId: authorUserId,
@@ -51,17 +58,20 @@ func NewTask(
 func NewTaskUninitialized(
 	title string,
 	description *string,
+	deadline *time.Time,
 	authorUserId int,
 ) Task {
 	return Task{
-		UninitializedId,
-		UninitializedVersion,
-		title,
-		description,
-		false,
-		time.Now(),
-		nil,
-		authorUserId,
+		ID:           UninitializedId,
+		Version:      UninitializedVersion,
+		Title:        title,
+		Description:  description,
+		Completed:    false,
+		StatusKey:    TaskStatusCreated,
+		Deadline:     deadline,
+		CreatedAt:    time.Now(),
+		CompletedAt:  nil,
+		AuthorUserId: authorUserId,
 	}
 }
 
@@ -69,11 +79,28 @@ func NewTaskPatch(
 	title Nullable[string],
 	description Nullable[string],
 	completed Nullable[bool],
+	deadline Nullable[time.Time],
 ) TaskPatch {
 	return TaskPatch{
 		Title:       title,
 		Description: description,
 		Completed:   completed,
+		Deadline:    deadline,
+	}
+}
+
+func (t *Task) UpdateStatus() {
+	if t.StatusKey == TaskStatusCompleted || t.StatusKey == TaskStatusFailed {
+		return
+	}
+	if t.Deadline != nil && time.Now().After(*t.Deadline) && !t.Completed {
+		t.StatusKey = TaskStatusFailed
+		return
+	}
+	if t.Completed {
+		t.StatusKey = TaskStatusCompleted
+	} else {
+		t.StatusKey = TaskStatusCreated
 	}
 }
 
@@ -101,6 +128,15 @@ func (t *Task) Validate() error {
 			return fmt.Errorf("CompletedAt must be null when completed=false :%w", core_errors.ErrInvalidArgument)
 		}
 	}
+
+	if !t.StatusKey.IsValid() {
+		return fmt.Errorf("invalid status key %d :%w", t.StatusKey, core_errors.ErrInvalidArgument)
+	}
+
+	if t.Deadline != nil && t.Deadline.Before(t.CreatedAt) {
+		return fmt.Errorf("deadline is earlier than CreatedAt :%w", core_errors.ErrInvalidArgument)
+	}
+
 	return nil
 }
 
@@ -125,16 +161,22 @@ func (t *Task) ApplyPatch(patch TaskPatch) error {
 	if patch.Description.Set {
 		tmp.Description = patch.Description.Value
 	}
+	if patch.Deadline.Set {
+		tmp.Deadline = patch.Deadline.Value
+	}
 	if patch.Completed.Set {
 		completed := *patch.Completed.Value
 		if completed {
 			completedAt := time.Now()
 			tmp.CompletedAt = &completedAt
+			tmp.StatusKey = TaskStatusCompleted
 		} else {
 			tmp.CompletedAt = nil
+			tmp.StatusKey = TaskStatusCreated
 		}
 		tmp.Completed = completed
 	}
+	tmp.UpdateStatus()
 
 	if err := tmp.Validate(); err != nil {
 		return fmt.Errorf("invalid patch: %w", err)
