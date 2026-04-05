@@ -1,0 +1,606 @@
+basePath: /api/v1
+definitions:
+  github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse:
+    properties:
+      error:
+        example: full error text
+        type: string
+      message:
+        example: short human-readable message
+        type: string
+    type: object
+  github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_types.Nullable-bool:
+    properties:
+      set:
+        type: boolean
+      value:
+        type: boolean
+    type: object
+  github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_types.Nullable-string:
+    properties:
+      set:
+        type: boolean
+      value:
+        type: string
+    type: object
+  internal_features_statistics_transport_http.GetStatisticsResponse:
+    properties:
+      tasks_average_completion_time:
+        example: 16h10m9.862461s
+        type: string
+      tasks_completed:
+        example: 7
+        type: integer
+      tasks_completed_rate:
+        example: 0.7
+        type: number
+      tasks_created:
+        example: 10
+        type: integer
+    type: object
+  internal_features_tasks_transport_http.CreateTaskRequest:
+    properties:
+      author_user_id:
+        example: 1
+        minimum: -1
+        type: integer
+      description:
+        example: Milk, eggs, bread
+        maxLength: 1000
+        minLength: 1
+        type: string
+      title:
+        example: Buy groceries
+        maxLength: 100
+        minLength: 1
+        type: string
+    required:
+    - author_user_id
+    - title
+    type: object
+  internal_features_tasks_transport_http.CreateTaskResponse:
+    properties:
+      author_user_id:
+        example: 1
+        type: integer
+      completed:
+        example: false
+        type: boolean
+      completed_at:
+        example: "2026-03-29T12:00:00Z"
+        type: string
+      created_at:
+        example: "2026-03-29T10:00:00Z"
+        type: string
+      description:
+        example: Milk, eggs, bread
+        type: string
+      id:
+        example: 1
+        type: integer
+      title:
+        example: Buy groceries
+        type: string
+      version:
+        example: 1
+        type: integer
+    type: object
+  internal_features_tasks_transport_http.GetTaskResponse:
+    properties:
+      author_user_id:
+        example: 1
+        type: integer
+      completed:
+        example: false
+        type: boolean
+      completed_at:
+        example: "2026-03-29T12:00:00Z"
+        type: string
+      created_at:
+        example: "2026-03-29T10:00:00Z"
+        type: string
+      description:
+        example: Milk, eggs, bread
+        type: string
+      id:
+        example: 1
+        type: integer
+      title:
+        example: Buy groceries
+        type: string
+      version:
+        example: 1
+        type: integer
+    type: object
+  internal_features_tasks_transport_http.PatchTaskRequest:
+    properties:
+      completed:
+        $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_types.Nullable-bool'
+      description:
+        $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_types.Nullable-string'
+      title:
+        $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_types.Nullable-string'
+    type: object
+  internal_features_tasks_transport_http.PatchTaskResponse:
+    properties:
+      author_user_id:
+        example: 1
+        type: integer
+      completed:
+        example: false
+        type: boolean
+      completed_at:
+        example: "2026-03-29T12:00:00Z"
+        type: string
+      created_at:
+        example: "2026-03-29T10:00:00Z"
+        type: string
+      description:
+        example: Milk, eggs, bread
+        type: string
+      id:
+        example: 1
+        type: integer
+      title:
+        example: Buy groceries
+        type: string
+      version:
+        example: 1
+        type: integer
+    type: object
+  internal_features_tasks_transport_http.TaskDTOResponse:
+    properties:
+      author_user_id:
+        example: 1
+        type: integer
+      completed:
+        example: false
+        type: boolean
+      completed_at:
+        example: "2026-03-29T12:00:00Z"
+        type: string
+      created_at:
+        example: "2026-03-29T10:00:00Z"
+        type: string
+      description:
+        example: Milk, eggs, bread
+        type: string
+      id:
+        example: 1
+        type: integer
+      title:
+        example: Buy groceries
+        type: string
+      version:
+        example: 1
+        type: integer
+    type: object
+  internal_features_users_transport_http.CreateUserRequest:
+    properties:
+      full_name:
+        example: John Doe
+        maxLength: 100
+        minLength: 3
+        type: string
+      phone_number:
+        example: "+79999999999"
+        maxLength: 15
+        minLength: 10
+        type: string
+    required:
+    - full_name
+    type: object
+  internal_features_users_transport_http.CreateUserResponse:
+    properties:
+      full_name:
+        example: John Doe
+        type: string
+      id:
+        example: 1
+        type: integer
+      phone_number:
+        example: "+79999999999"
+        type: string
+      version:
+        example: 1
+        type: integer
+    type: object
+  internal_features_users_transport_http.GetUserResponse:
+    properties:
+      full_name:
+        example: John Doe
+        type: string
+      id:
+        example: 1
+        type: integer
+      phone_number:
+        example: "+79999999999"
+        type: string
+      version:
+        example: 1
+        type: integer
+    type: object
+  internal_features_users_transport_http.PatchUserRequest:
+    properties:
+      full_name:
+        $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_types.Nullable-string'
+      phone_number:
+        $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_types.Nullable-string'
+    type: object
+  internal_features_users_transport_http.PatchUserResponse:
+    properties:
+      full_name:
+        example: John Doe
+        type: string
+      id:
+        example: 1
+        type: integer
+      phone_number:
+        example: "+79999999999"
+        type: string
+      version:
+        example: 1
+        type: integer
+    type: object
+  internal_features_users_transport_http.UserDTOResponse:
+    properties:
+      full_name:
+        example: John Doe
+        type: string
+      id:
+        example: 1
+        type: integer
+      phone_number:
+        example: "+79999999999"
+        type: string
+      version:
+        example: 1
+        type: integer
+    type: object
+info:
+  contact: {}
+  title: Golang To do API
+  version: "1.0"
+paths:
+  /statistics:
+    get:
+      description: Возвращает статистику по задачам с возможностью фильтрации по пользователю
+        и диапазону дат
+      parameters:
+      - description: ID пользователя для фильтрации статистики
+        example: 1
+        in: query
+        name: user_id
+        type: integer
+      - description: Начальная дата периода
+        example: "2026-03-01"
+        in: query
+        name: from
+        type: string
+      - description: Конечная дата периода
+        example: "2026-03-29"
+        in: query
+        name: to
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Статистика успешно получена
+          schema:
+            $ref: '#/definitions/internal_features_statistics_transport_http.GetStatisticsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse'
+      summary: Получение статистики
+      tags:
+      - statistics
+  /tasks:
+    get:
+      description: Возвращает список задач с возможностью фильтрации по user_id и
+        пагинацией через limit и offset
+      parameters:
+      - description: ID пользователя для фильтрации задач
+        example: 1
+        in: query
+        name: user_id
+        type: integer
+      - description: Лимит количества задач
+        example: 10
+        in: query
+        name: limit
+        type: integer
+      - description: Смещение для пагинации
+        example: 0
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список задач успешно получен
+          schema:
+            items:
+              $ref: '#/definitions/internal_features_tasks_transport_http.TaskDTOResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse'
+      summary: Получение списка задач
+      tags:
+      - tasks
+    post:
+      consumes:
+      - application/json
+      description: Создает новую задачу в системе
+      parameters:
+      - description: Тело запроса для создания задачи
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_features_tasks_transport_http.CreateTaskRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Задача успешно создана
+          schema:
+            $ref: '#/definitions/internal_features_tasks_transport_http.CreateTaskResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse'
+      summary: Создание задачи
+      tags:
+      - tasks
+  /tasks/{id}:
+    delete:
+      description: Удаляет задачу из системы по идентификатору
+      parameters:
+      - description: ID задачи
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Задача успешно удалена
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse'
+      summary: Удаление задачи
+      tags:
+      - tasks
+    get:
+      description: Возвращает задачу по идентификатору
+      parameters:
+      - description: ID задачи
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Задача успешно получена
+          schema:
+            $ref: '#/definitions/internal_features_tasks_transport_http.GetTaskResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse'
+      summary: Получение задачи
+      tags:
+      - tasks
+    patch:
+      consumes:
+      - application/json
+      description: Частично обновляет данные задачи по идентификатору
+      parameters:
+      - description: ID задачи
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Тело запроса для частичного обновления задачи
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_features_tasks_transport_http.PatchTaskRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Задача успешно обновлена
+          schema:
+            $ref: '#/definitions/internal_features_tasks_transport_http.PatchTaskResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse'
+      summary: Частичное обновление задачи
+      tags:
+      - tasks
+  /users:
+    get:
+      description: Возвращает список пользователей с поддержкой пагинации через limit
+        и offset
+      parameters:
+      - description: Лимит количества пользователей
+        example: 10
+        in: query
+        name: limit
+        type: integer
+      - description: Смещение для пагинации
+        example: 0
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список пользователей успешно получен
+          schema:
+            items:
+              $ref: '#/definitions/internal_features_users_transport_http.UserDTOResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse'
+      summary: Получение списка пользователей
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      description: СОздать нового пользователя в системе
+      parameters:
+      - description: CreateUser тело запроса
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_features_users_transport_http.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Успешно созданный пользователь
+          schema:
+            $ref: '#/definitions/internal_features_users_transport_http.CreateUserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse'
+      summary: Создание пользователя
+      tags:
+      - users
+  /users/{id}:
+    delete:
+      description: Удаляет пользователя из системы по идентификатору
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Пользователь успешно удален
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse'
+      summary: Удаление пользователя
+      tags:
+      - users
+    get:
+      description: Возвращает пользователя по идентификатору
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Пользователь успешно получен
+          schema:
+            $ref: '#/definitions/internal_features_users_transport_http.GetUserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse'
+      summary: Получение пользователя
+      tags:
+      - users
+    patch:
+      consumes:
+      - application/json
+      description: Частично обновляет данные пользователя по идентификатору
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Тело запроса для частичного обновления пользователя
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_features_users_transport_http.PatchUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Пользователь успешно обновлен
+          schema:
+            $ref: '#/definitions/internal_features_users_transport_http.PatchUserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse'
+      summary: Частичное обновление пользователя
+      tags:
+      - users
+swagger: "2.0"

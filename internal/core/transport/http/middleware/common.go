@@ -2,6 +2,7 @@ package core_http_middleware
 
 import (
 	"net/http"
+	"net/url"
 	"runtime/debug"
 	"time"
 
@@ -11,9 +12,59 @@ import (
 	"go.uber.org/zap"
 )
 
-const (
-	requestIDHeader = "X-Request-ID"
-)
+const requestIDHeader = "X-Request-ID"
+
+func CORS() Middleware {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			origin := r.Header.Get("Origin")
+
+			if isAllowedOrigin(origin) {
+				w.Header().Set("Access-Control-Allow-Origin", origin)
+				w.Header().Set("Vary", "Origin")
+				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS")
+
+				requestHeaders := r.Header.Get("Access-Control-Request-Headers")
+				if requestHeaders != "" {
+					w.Header().Set("Access-Control-Allow-Headers", requestHeaders)
+				} else {
+					w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Request-ID, Accept")
+				}
+			}
+
+			if r.Method == http.MethodOptions {
+				w.WriteHeader(http.StatusNoContent)
+				return
+			}
+
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
+func isAllowedOrigin(origin string) bool {
+	if origin == "" {
+		return false
+	}
+
+	u, err := url.Parse(origin)
+	if err != nil {
+		return false
+	}
+
+	if u.Scheme != "http" && u.Scheme != "https" {
+		return false
+	}
+
+	host := u.Hostname()
+
+	switch host {
+	case "localhost", "127.0.0.1", "45.131.41.192":
+		return true
+	default:
+		return false
+	}
+}
 
 func RequestId() Middleware {
 	return func(next http.Handler) http.Handler {
@@ -89,8 +140,8 @@ func Trace() Middleware {
 
 			log.Debug(
 				"<<< finished HTTP request",
-				zap.Int("status_code: ", rw.GetStatusCodeOrPanic()),
-				zap.Duration("time", time.Now().Sub(before)),
+				zap.Int("status_code", rw.StatusCode()),
+				zap.Duration("time", time.Since(before)),
 			)
 		})
 	}

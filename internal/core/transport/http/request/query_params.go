@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	core_errors "github.com/Damnexile1/GOLANG_TODOAPP/internal/core/errors"
 )
@@ -26,4 +27,20 @@ func GetIntQueryParam(r *http.Request, key string) (*int, error) {
 	}
 
 	return &value, nil
+}
+
+func GetDateQueryParam(r *http.Request, key string) (*time.Time, error) {
+	param := r.URL.Query().Get(key)
+	if param == "" {
+		return nil, nil
+	}
+
+	layout := "2006-01-02"
+
+	date, err := time.Parse(layout, param)
+	if err != nil {
+		return nil, fmt.Errorf("param=`%s` by key=`%s`: %w", param, key, err)
+	}
+
+	return &date, nil
 }
