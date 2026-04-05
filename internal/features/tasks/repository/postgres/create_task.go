@@ -18,9 +18,9 @@ func (r *TasksRepository) Create(
 	defer cancel()
 
 	query := `
-	insert into todoapp.tasks (title, description, completed, created_at, completed_at, author_user_id)
-	values ($1, $2, $3, $4, $5, $6)
-	returning id, version, title, description, completed, created_at, completed_at, author_user_id;
+	insert into todoapp.tasks (title, description, completed, status_key, deadline, created_at, completed_at, author_user_id)
+	values ($1, $2, $3, $4, $5, $6, $7, $8)
+	returning id, version, title, description, completed, status_key, deadline, created_at, completed_at, author_user_id;
 	`
 
 	row := r.pool.QueryRow(
@@ -29,6 +29,8 @@ func (r *TasksRepository) Create(
 		task.Title,
 		task.Description,
 		task.Completed,
+		int(task.StatusKey),
+		task.Deadline,
 		task.CreatedAt,
 		task.CompletedAt,
 		task.AuthorUserId,
@@ -40,6 +42,8 @@ func (r *TasksRepository) Create(
 		&taskModel.Title,
 		&taskModel.Description,
 		&taskModel.Completed,
+		&taskModel.StatusKey,
+		&taskModel.Deadline,
 		&taskModel.CreatedAt,
 		&taskModel.CompletedAt,
 		&taskModel.AuthorUserId,
@@ -52,16 +56,7 @@ func (r *TasksRepository) Create(
 		return domain.Task{}, fmt.Errorf("scan error %w", err)
 	}
 
-	taskDomain := domain.Task{
-		ID:           taskModel.ID,
-		Version:      taskModel.Version,
-		Title:        taskModel.Title,
-		Description:  taskModel.Description,
-		Completed:    taskModel.Completed,
-		CreatedAt:    taskModel.CreatedAt,
-		CompletedAt:  taskModel.CompletedAt,
-		AuthorUserId: taskModel.AuthorUserId,
-	}
+	taskDomain := taskDomainFromModel(taskModel)
 
 	return taskDomain, nil
 }

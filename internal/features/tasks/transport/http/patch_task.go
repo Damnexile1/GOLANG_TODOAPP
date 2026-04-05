@@ -3,6 +3,7 @@ package tasks_transport_http
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/Damnexile1/GOLANG_TODOAPP/internal/core/domain"
 	core_logger "github.com/Damnexile1/GOLANG_TODOAPP/internal/core/logger"
@@ -12,9 +13,10 @@ import (
 )
 
 type PatchTaskRequest struct {
-	Title       types.Nullable[string] `json:"title"`
-	Description types.Nullable[string] `json:"description"`
-	Completed   types.Nullable[bool]   `json:"completed"`
+	Title       types.Nullable[string]    `json:"title"`
+	Description types.Nullable[string]    `json:"description"`
+	Completed   types.Nullable[bool]      `json:"completed"`
+	Deadline    types.Nullable[time.Time] `json:"deadline"`
 }
 
 type PatchTaskResponse TaskDTOResponse
@@ -88,5 +90,6 @@ func taskPatchFromRequest(request PatchTaskRequest) domain.TaskPatch {
 		request.Title.ToDomain(),
 		request.Description.ToDomain(),
 		request.Completed.ToDomain(),
+		request.Deadline.ToDomain(),
 	)
 }

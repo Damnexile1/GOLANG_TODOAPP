@@ -2,6 +2,7 @@ package tasks_transport_http
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/Damnexile1/GOLANG_TODOAPP/internal/core/domain"
 	core_logger "github.com/Damnexile1/GOLANG_TODOAPP/internal/core/logger"
@@ -10,9 +11,10 @@ import (
 )
 
 type CreateTaskRequest struct {
-	Title        string  `json:"title" validate:"required,min=1,max=100" example:"Buy groceries"`
-	Description  *string `json:"description" validate:"omitempty,min=1,max=1000" example:"Milk, eggs, bread"`
-	AuthorUserId int     `json:"author_user_id" validate:"required,gte=-1" example:"1"`
+	Title        string     `json:"title" validate:"required,min=1,max=100" example:"Buy groceries"`
+	Description  *string    `json:"description" validate:"omitempty,min=1,max=1000" example:"Milk, eggs, bread"`
+	Deadline     *time.Time `json:"deadline" validate:"omitempty" example:"2026-04-05T10:00:00Z"`
+	AuthorUserId int        `json:"author_user_id" validate:"required,gte=-1" example:"1"`
 }
 
 type CreateTaskResponse TaskDTOResponse
@@ -45,6 +47,7 @@ func (h *TasksHTTPHandler) CreateTask(rw http.ResponseWriter, r *http.Request) {
 	taskDomain := domain.NewTaskUninitialized(
 		req.Title,
 		req.Description,
+		req.Deadline,
 		req.AuthorUserId,
 	)
 

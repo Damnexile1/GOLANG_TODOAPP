@@ -15,7 +15,7 @@ func (r *TasksRepository) GetTaskById(ctx context.Context, taskId int) (domain.T
 	defer cancel()
 
 	query := `
-	select id, version, title, description, completed, created_at, completed_at, author_user_id
+	select id, version, title, description, completed, status_key, deadline, created_at, completed_at, author_user_id
 	from todoapp.tasks
 	where id = $1;
 	`
@@ -28,6 +28,8 @@ func (r *TasksRepository) GetTaskById(ctx context.Context, taskId int) (domain.T
 		&taskModel.Title,
 		&taskModel.Description,
 		&taskModel.Completed,
+		&taskModel.StatusKey,
+		&taskModel.Deadline,
 		&taskModel.CreatedAt,
 		&taskModel.CompletedAt,
 		&taskModel.AuthorUserId,
@@ -38,15 +40,6 @@ func (r *TasksRepository) GetTaskById(ctx context.Context, taskId int) (domain.T
 		}
 		return domain.Task{}, fmt.Errorf("scan row: %w", err)
 	}
-	taskDomain := domain.Task{
-		ID:           taskModel.ID,
-		Version:      taskModel.Version,
-		Title:        taskModel.Title,
-		Description:  taskModel.Description,
-		Completed:    taskModel.Completed,
-		CreatedAt:    taskModel.CreatedAt,
-		CompletedAt:  taskModel.CompletedAt,
-		AuthorUserId: taskModel.AuthorUserId,
-	}
+	taskDomain := taskDomainFromModel(taskModel)
 	return taskDomain, nil
 }

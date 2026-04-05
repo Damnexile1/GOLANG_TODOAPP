@@ -24,15 +24,19 @@ func (r *TasksRepository) PatchTask(
 	    title = $1,
 	    description = $2,
 	    completed = $3,
-	    completed_at = $4,
+	    status_key = $4,
+	    deadline = $5,
+	    completed_at = $6,
 	    version = version + 1
-	where id = $5 and version = $6
+	where id = $7 and version = $8
 	returning 
 		id,
 		version,
 		title,
 		description,
 		completed,
+		status_key,
+		deadline,
 		created_at,
 		completed_at,
 		author_user_id
@@ -43,6 +47,8 @@ func (r *TasksRepository) PatchTask(
 		task.Title,
 		task.Description,
 		task.Completed,
+		int(task.StatusKey),
+		task.Deadline,
 		task.CompletedAt,
 		task.ID,
 		task.Version,
@@ -54,6 +60,8 @@ func (r *TasksRepository) PatchTask(
 		&taskModel.Title,
 		&taskModel.Description,
 		&taskModel.Completed,
+		&taskModel.StatusKey,
+		&taskModel.Deadline,
 		&taskModel.CreatedAt,
 		&taskModel.CompletedAt,
 		&taskModel.AuthorUserId,
@@ -68,15 +76,6 @@ func (r *TasksRepository) PatchTask(
 		}
 		return domain.Task{}, fmt.Errorf("scan failed: %w", err)
 	}
-	taskDomain := domain.Task{
-		ID:           taskModel.ID,
-		Version:      taskModel.Version,
-		Title:        taskModel.Title,
-		Description:  taskModel.Description,
-		Completed:    taskModel.Completed,
-		CreatedAt:    taskModel.CreatedAt,
-		CompletedAt:  taskModel.CompletedAt,
-		AuthorUserId: taskModel.AuthorUserId,
-	}
+	taskDomain := taskDomainFromModel(taskModel)
 	return taskDomain, nil
 }
