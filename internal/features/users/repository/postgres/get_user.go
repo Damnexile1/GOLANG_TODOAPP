@@ -18,7 +18,7 @@ func (r *UsersRepository) GetUser(
 	defer cancel()
 
 	query := `
-	select id, version, full_name, phone_number
+	select id, version, full_name, phone_number, email, password_hash, role, manager_id
 	from todoapp.users
 	where id = $1;
 	`
@@ -30,6 +30,10 @@ func (r *UsersRepository) GetUser(
 		&userModel.Version,
 		&userModel.FullName,
 		&userModel.PhoneNumber,
+		&userModel.Email,
+		&userModel.PasswordHash,
+		&userModel.Role,
+		&userModel.ManagerId,
 	)
 	if err != nil {
 		if errors.Is(err, core_postgres_pool.ErrNoRows) {
@@ -38,11 +42,16 @@ func (r *UsersRepository) GetUser(
 		return domain.User{}, fmt.Errorf("scan error: %w", err)
 	}
 
+	role, _ := domain.UserRoleFromInt(userModel.Role)
 	userDomain := domain.NewUser(
 		userModel.ID,
 		userModel.Version,
 		userModel.FullName,
 		userModel.PhoneNumber,
+		userModel.Email,
+		userModel.PasswordHash,
+		role,
+		userModel.ManagerId,
 	)
 	return userDomain, nil
 }

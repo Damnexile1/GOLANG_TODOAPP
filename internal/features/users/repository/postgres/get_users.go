@@ -15,7 +15,7 @@ func (r *UsersRepository) GetUsers(
 	defer cancel()
 
 	query := `
-	select id, version, full_name, phone_number
+	select id, version, full_name, phone_number, email, password_hash, role, manager_id
 	from todoapp.users
 	order by id asc
 	limit $1
@@ -37,6 +37,10 @@ func (r *UsersRepository) GetUsers(
 			&userModel.Version,
 			&userModel.FullName,
 			&userModel.PhoneNumber,
+			&userModel.Email,
+			&userModel.PasswordHash,
+			&userModel.Role,
+			&userModel.ManagerId,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("scan: %w", err)

@@ -54,5 +54,14 @@ func (h *UsersHttpHandler) CreateUser(rw http.ResponseWriter, r *http.Request) {
 }
 
 func domainFromDTO(dto CreateUserRequest) domain.User {
-	return domain.NewUserUninitialized(dto.FullName, dto.PhoneNumber)
+	// Временно создаем пользователя с дефолтными значениями
+	// TODO: добавить email и password в CreateUserRequest после реализации auth
+	return domain.NewUserUninitialized(
+		dto.FullName,
+		dto.PhoneNumber,
+		"",                  // email - будет заполняться через auth
+		"",                  // password_hash - будет заполняться через auth
+		domain.UserRoleUser, // по умолчанию обычный пользователь
+		nil,                 // manager_id
+	)
 }
