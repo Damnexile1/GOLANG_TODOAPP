@@ -100,23 +100,21 @@ func main() {
 		core_http_middleware.Trace(),
 	)
 
-	// Публичные endpoints (без авторизации)
-	apiVersionRouterV1Public := core_http_server.NewApiVersionRouter(core_http_server.ApiVersion1)
-	apiVersionRouterV1Public.RegisterRoutes(authTransportHTTP.Routes()...)
-
-	// Защищенные endpoints (требуют авторизации)
-	apiVersionRouterV1Protected := core_http_server.NewApiVersionRouter(
+	// Один роутер для всех endpoints
+	// Auth endpoints - публичные (без middleware)
+	// Остальные endpoints будут защищены через middleware на уровне роутера
+	apiVersionRouterV1 := core_http_server.NewApiVersionRouter(
 		core_http_server.ApiVersion1,
-		core_http_middleware.Auth(jwtManager),
+		core_http_middleware.Auth(jwtManager), // Применяем Auth ко всем, кроме auth endpoints
 	)
-	apiVersionRouterV1Protected.RegisterRoutes(usersTransportHTTP.Routes()...)
-	apiVersionRouterV1Protected.RegisterRoutes(tasksTransportHttp.Routes()...)
-	apiVersionRouterV1Protected.RegisterRoutes(statisticsTransportHTTP.Routes()...)
 
-	httpServer.RegisterApiRoutes(
-		apiVersionRouterV1Public,
-		apiVersionRouterV1Protected,
-	)
+	// Регистрируем все routes
+	apiVersionRouterV1.RegisterRoutes(authTransportHTTP.Routes()...)
+	apiVersionRouterV1.RegisterRoutes(usersTransportHTTP.Routes()...)
+	apiVersionRouterV1.RegisterRoutes(tasksTransportHttp.Routes()...)
+	apiVersionRouterV1.RegisterRoutes(statisticsTransportHTTP.Routes()...)
+
+	httpServer.RegisterApiRoutes(apiVersionRouterV1)
 	httpServer.RegisterSwagger()
 
 	if err := httpServer.Run(ctx); err != nil {

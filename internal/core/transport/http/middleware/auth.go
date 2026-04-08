@@ -19,9 +19,16 @@ const (
 )
 
 // Auth middleware проверяет JWT токен и добавляет данные пользователя в контекст
+// Пропускает публичные пути (auth endpoints)
 func Auth(jwtManager *jwt.JWTManager) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Пропускаем auth endpoints без проверки токена
+			if strings.HasPrefix(r.URL.Path, "/auth/") {
+				next.ServeHTTP(w, r)
+				return
+			}
+
 			logger := core_logger.FromContext(r.Context())
 			responseHandler := core_http_response.NewHTTPResponseHandler(logger, w)
 
