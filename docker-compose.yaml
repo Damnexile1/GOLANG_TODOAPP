@@ -60,3 +60,15 @@ services:
         ENTRYPOINT ["swag"]
     volumes:
       - ${PROJECT_ROOT}:/code
+  frontend:
+    build:
+      context: ${PROJECT_ROOT}/frontend
+      dockerfile: Dockerfile
+    container_name: todoapp-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:5050/api/v1
+    depends_on:
+      - todoapp
+    restart: always

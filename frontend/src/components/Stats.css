@@ -1,0 +1,45 @@
+.stats-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.stats-card:hover {
+  transform: translateY(-4px);
+}
+
+.stats-card-value {
+  font-size: 32px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.stats-card-title {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.stats-card-subtitle {
+  font-size: 14px;
+  color: #888;
+}
+
+.stats-card-blue {
+  border-top: 4px solid #4A90E2;
+}
+
+.stats-card-green {
+  border-top: 4px solid #7ED321;
+}
+
+.stats-card-purple {
+  border-top: 4px solid #9B5DE5;
+}
+
+.stats-card-red {
+  border-top: 4px solid #D0021B;
+}

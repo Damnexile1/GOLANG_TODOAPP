@@ -15,156 +15,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/auth/login": {
-            "post": {
-                "description": "Авторизует пользователя и возвращает JWT токены",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "auth"
-                ],
-                "summary": "Вход пользователя",
-                "parameters": [
-                    {
-                        "description": "Данные для входа",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/internal_features_auth_transport_http.LoginRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Успешный вход",
-                        "schema": {
-                            "$ref": "#/definitions/internal_features_auth_transport_http.LoginResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/auth/refresh": {
-            "post": {
-                "description": "Обновляет access token используя refresh token",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "auth"
-                ],
-                "summary": "Обновление токена",
-                "parameters": [
-                    {
-                        "description": "Refresh token",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/internal_features_auth_transport_http.RefreshTokenRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Новые токены",
-                        "schema": {
-                            "$ref": "#/definitions/internal_features_auth_transport_http.RefreshTokenResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/auth/register": {
-            "post": {
-                "description": "Регистрирует нового пользователя и возвращает JWT токены",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "auth"
-                ],
-                "summary": "Регистрация пользователя",
-                "parameters": [
-                    {
-                        "description": "Данные для регистрации",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/internal_features_auth_transport_http.RegisterRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Успешная регистрация",
-                        "schema": {
-                            "$ref": "#/definitions/internal_features_auth_transport_http.RegisterResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/statistics": {
             "get": {
                 "description": "Возвращает статистику по задачам с возможностью фильтрации по пользователю и диапазону дат",
@@ -710,111 +560,6 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_types.Nullable-time_Time": {
-            "type": "object",
-            "properties": {
-                "set": {
-                    "type": "boolean"
-                },
-                "value": {
-                    "type": "string"
-                }
-            }
-        },
-        "internal_features_auth_transport_http.LoginRequest": {
-            "type": "object",
-            "required": [
-                "email",
-                "password"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string",
-                    "example": "user@example.com"
-                },
-                "password": {
-                    "type": "string",
-                    "example": "password123"
-                }
-            }
-        },
-        "internal_features_auth_transport_http.LoginResponse": {
-            "type": "object",
-            "properties": {
-                "access_token": {
-                    "type": "string"
-                },
-                "refresh_token": {
-                    "type": "string"
-                }
-            }
-        },
-        "internal_features_auth_transport_http.RefreshTokenRequest": {
-            "type": "object",
-            "required": [
-                "refresh_token"
-            ],
-            "properties": {
-                "refresh_token": {
-                    "type": "string",
-                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-                }
-            }
-        },
-        "internal_features_auth_transport_http.RefreshTokenResponse": {
-            "type": "object",
-            "properties": {
-                "access_token": {
-                    "type": "string"
-                },
-                "refresh_token": {
-                    "type": "string"
-                }
-            }
-        },
-        "internal_features_auth_transport_http.RegisterRequest": {
-            "type": "object",
-            "required": [
-                "email",
-                "full_name",
-                "password"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string",
-                    "example": "user@example.com"
-                },
-                "full_name": {
-                    "type": "string",
-                    "maxLength": 100,
-                    "minLength": 3,
-                    "example": "John Doe"
-                },
-                "password": {
-                    "type": "string",
-                    "maxLength": 100,
-                    "minLength": 6,
-                    "example": "password123"
-                },
-                "phone_number": {
-                    "type": "string",
-                    "maxLength": 15,
-                    "minLength": 10,
-                    "example": "+79999999999"
-                }
-            }
-        },
-        "internal_features_auth_transport_http.RegisterResponse": {
-            "type": "object",
-            "properties": {
-                "access_token": {
-                    "type": "string"
-                },
-                "refresh_token": {
-                    "type": "string"
-                }
-            }
-        },
         "internal_features_statistics_transport_http.GetStatisticsResponse": {
             "type": "object",
             "properties": {
@@ -847,10 +592,6 @@ const docTemplate = `{
                     "type": "integer",
                     "minimum": -1,
                     "example": 1
-                },
-                "deadline": {
-                    "type": "string",
-                    "example": "2026-04-05T10:00:00Z"
                 },
                 "description": {
                     "type": "string",
@@ -885,10 +626,6 @@ const docTemplate = `{
                     "type": "string",
                     "example": "2026-03-29T10:00:00Z"
                 },
-                "deadline": {
-                    "type": "string",
-                    "example": "2026-04-05T10:00:00Z"
-                },
                 "description": {
                     "type": "string",
                     "example": "Milk, eggs, bread"
@@ -896,10 +633,6 @@ const docTemplate = `{
                 "id": {
                     "type": "integer",
                     "example": 1
-                },
-                "status": {
-                    "type": "string",
-                    "example": "created"
                 },
                 "title": {
                     "type": "string",
@@ -930,10 +663,6 @@ const docTemplate = `{
                     "type": "string",
                     "example": "2026-03-29T10:00:00Z"
                 },
-                "deadline": {
-                    "type": "string",
-                    "example": "2026-04-05T10:00:00Z"
-                },
                 "description": {
                     "type": "string",
                     "example": "Milk, eggs, bread"
@@ -941,10 +670,6 @@ const docTemplate = `{
                 "id": {
                     "type": "integer",
                     "example": 1
-                },
-                "status": {
-                    "type": "string",
-                    "example": "created"
                 },
                 "title": {
                     "type": "string",
@@ -961,9 +686,6 @@ const docTemplate = `{
             "properties": {
                 "completed": {
                     "$ref": "#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_types.Nullable-bool"
-                },
-                "deadline": {
-                    "$ref": "#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_types.Nullable-time_Time"
                 },
                 "description": {
                     "$ref": "#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_types.Nullable-string"
@@ -992,10 +714,6 @@ const docTemplate = `{
                     "type": "string",
                     "example": "2026-03-29T10:00:00Z"
                 },
-                "deadline": {
-                    "type": "string",
-                    "example": "2026-04-05T10:00:00Z"
-                },
                 "description": {
                     "type": "string",
                     "example": "Milk, eggs, bread"
@@ -1003,10 +721,6 @@ const docTemplate = `{
                 "id": {
                     "type": "integer",
                     "example": 1
-                },
-                "status": {
-                    "type": "string",
-                    "example": "created"
                 },
                 "title": {
                     "type": "string",
@@ -1037,10 +751,6 @@ const docTemplate = `{
                     "type": "string",
                     "example": "2026-03-29T10:00:00Z"
                 },
-                "deadline": {
-                    "type": "string",
-                    "example": "2026-04-05T10:00:00Z"
-                },
                 "description": {
                     "type": "string",
                     "example": "Milk, eggs, bread"
@@ -1048,10 +758,6 @@ const docTemplate = `{
                 "id": {
                     "type": "integer",
                     "example": 1
-                },
-                "status": {
-                    "type": "string",
-                    "example": "created"
                 },
                 "title": {
                     "type": "string",
@@ -1177,14 +883,6 @@ const docTemplate = `{
                     "example": 1
                 }
             }
-        }
-    },
-    "securityDefinitions": {
-        "BearerAuth": {
-            "description": "Type \"Bearer\" followed by a space and JWT token.",
-            "type": "apiKey",
-            "name": "Authorization",
-            "in": "header"
         }
     }
 }`
