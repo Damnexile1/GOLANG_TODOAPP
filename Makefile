@@ -86,8 +86,14 @@ up:
 todoapp-deploy:
 	@docker compose up -d --build todoapp frontend
 
+todoapp-deploy-prod:
+	@docker compose -f docker-compose.yaml -f docker-compose.prod.yaml up -d --build todoapp frontend
+
 todoapp-undeploy:
 	@docker compose down todoapp
+
+todoapp-undeploy-prod:
+	@docker compose -f docker-compose.yaml -f docker-compose.prod.yaml down todoapp frontend
 
 swagger-gen:
 	@docker compose run --rm swagger \
