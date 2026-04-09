@@ -84,7 +84,7 @@ up:
 	make todoapp-run
 
 todoapp-deploy:
-	@docker compose up -d --build todoapp
+	@docker compose up -d --build todoapp frontend
 
 todoapp-undeploy:
 	@docker compose down todoapp
