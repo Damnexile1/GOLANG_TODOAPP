@@ -1,7 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 
-const API_URL = 'http://localhost:5050/api/v1';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5050/api/v1';
+
+// Функция для декодирования JWT токена
+const decodeJWT = (token) => {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(jsonPayload);
+  } catch (error) {
+    console.error('Failed to decode JWT:', error);
+    return null;
+  }
+};
 
 // Компонент Авторизации
 const AuthPage = ({ onLogin }) => {
@@ -20,9 +35,26 @@ const AuthPage = ({ onLogin }) => {
 
     try {
       const endpoint = isLogin ? '/auth/login' : '/auth/register';
-      const body = isLogin 
-        ? { email: formData.email, password: formData.password }
-        : formData;
+      
+      // Подготовка данных для отправки
+      let body;
+      if (isLogin) {
+        body = { 
+          email: formData.email, 
+          password: formData.password 
+        };
+      } else {
+        // Для регистрации fullName обязателен
+        body = { 
+          email: formData.email, 
+          password: formData.password,
+          full_name: formData.fullName.trim()
+        };
+        // phoneNumber необязателен
+        if (formData.phoneNumber && formData.phoneNumber.trim()) {
+          body.phone_number = formData.phoneNumber.trim();
+        }
+      }
 
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'POST',
@@ -31,15 +63,38 @@ const AuthPage = ({ onLogin }) => {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Authentication failed');
+        const errorData = await response.json().catch(() => ({}));
+        
+        // Обработка различных типов ошибок
+        let errorMessage = 'Authentication failed';
+        
+        if (errorData.message) {
+          errorMessage = errorData.message;
+        } else if (errorData.error) {
+          errorMessage = errorData.error;
+        }
+        
+        // Переводим технические ошибки в понятные сообщения
+        if (errorMessage.includes('failed to decode')) {
+          errorMessage = 'Invalid data format. Please check your input.';
+        } else if (errorMessage.includes('invalid email')) {
+          errorMessage = 'Please enter a valid email address.';
+        } else if (errorMessage.includes('password')) {
+          errorMessage = 'Password is too short or invalid.';
+        } else if (errorMessage.includes('already exists')) {
+          errorMessage = 'This email is already registered.';
+        } else if (errorMessage.includes('invalid email or password')) {
+          errorMessage = 'Invalid email or password.';
+        }
+        
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
       localStorage.setItem('accessToken', data.access_token);
       onLogin();
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'An error occurred. Please try again.');
     }
   };
 
@@ -77,10 +132,9 @@ const AuthPage = ({ onLogin }) => {
             />
             <input
               type="tel"
-              placeholder="Phone Number"
+              placeholder="Phone Number (optional)"
               value={formData.phoneNumber}
               onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-              required
             />
           </>
         )}
@@ -117,7 +171,14 @@ const TasksPage = ({ token, onLogout }) => {
     setIsLoading(true);
     setError('');
     try {
-      const response = await fetch(`${API_URL}/tasks`, {
+      // Получаем user_id из токена
+      const decodedToken = decodeJWT(token);
+      const userId = decodedToken?.user_id;
+      
+      // Добавляем фильтр по userId (бэкенд ожидает user_id с подчеркиванием)
+      const url = userId ? `${API_URL}/tasks?user_id=${userId}` : `${API_URL}/tasks`;
+      
+      const response = await fetch(url, {
         headers: { 'Authorization': `Bearer ${token}` },
       });
 
@@ -135,13 +196,34 @@ const TasksPage = ({ token, onLogout }) => {
   const createTask = async (e) => {
     e.preventDefault();
     try {
+      // Получаем user_id из токена
+      const decodedToken = decodeJWT(token);
+      const userId = decodedToken?.user_id;
+      
+      if (!userId) {
+        throw new Error('User ID not found in token');
+      }
+      
+      const taskData = {
+        title: newTask.title,
+        description: newTask.description,
+        author_user_id: userId,
+      };
+      
+      // Добавляем deadline только если он указан
+      if (newTask.deadline) {
+        // Конвертируем datetime-local формат в ISO 8601 с таймзоной
+        const deadlineDate = new Date(newTask.deadline);
+        taskData.deadline = deadlineDate.toISOString();
+      }
+
       const response = await fetch(`${API_URL}/tasks`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(newTask),
+        body: JSON.stringify(taskData),
       });
 
       if (!response.ok) throw new Error('Failed to create task');
@@ -226,9 +308,9 @@ const TasksPage = ({ token, onLogout }) => {
         />
         <input
           type="datetime-local"
+          placeholder="Deadline (optional)"
           value={newTask.deadline}
           onChange={(e) => setNewTask({ ...newTask, deadline: e.target.value })}
-          required
         />
         <button type="submit">Create Task</button>
       </form>
@@ -311,7 +393,19 @@ const UsersPage = ({ token, onLogout }) => {
         headers: { 'Authorization': `Bearer ${token}` },
       });
 
-      if (!response.ok) throw new Error('Failed to delete user');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        let errorMessage = 'Failed to delete user';
+        
+        // Проверяем на ошибку foreign key constraint
+        if (errorData.error && errorData.error.includes('foreign key constraint')) {
+          errorMessage = 'Cannot delete user with existing tasks. Please delete all user tasks first.';
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        }
+        
+        throw new Error(errorMessage);
+      }
 
       fetchUsers();
     } catch (err) {
@@ -380,7 +474,14 @@ const StatsPage = ({ token, onLogout }) => {
     setIsLoading(true);
     setError('');
     try {
-      const response = await fetch(`${API_URL}/statistics`, {
+      // Получаем user_id из токена
+      const decodedToken = decodeJWT(token);
+      const userId = decodedToken?.user_id;
+      
+      // Добавляем фильтр по userId (бэкенд ожидает user_id с подчеркиванием)
+      const url = userId ? `${API_URL}/statistics?user_id=${userId}` : `${API_URL}/statistics`;
+      
+      const response = await fetch(url, {
         headers: { 'Authorization': `Bearer ${token}` },
       });
 
@@ -431,7 +532,7 @@ const StatsPage = ({ token, onLogout }) => {
           
           <div className="stats-card">
             <div className="stats-card-value">
-              {stats?.tasks_completed_rate ? `${(stats.tasks_completed_rate * 100).toFixed(1)}%` : '0%'}
+              {stats?.tasks_completed_rate ? `${stats.tasks_completed_rate.toFixed(1)}%` : '0%'}
             </div>
             <div className="stats-card-title">Completion Rate</div>
           </div>
@@ -457,7 +558,14 @@ const ProfilePage = ({ token, onLogout }) => {
     setIsLoading(true);
     setError('');
     try {
-      const response = await fetch(`${API_URL}/statistics`, {
+      // Получаем user_id из токена
+      const decodedToken = decodeJWT(token);
+      const userId = decodedToken?.user_id;
+      
+      // Добавляем фильтр по userId (бэкенд ожидает user_id с подчеркиванием)
+      const url = userId ? `${API_URL}/statistics?user_id=${userId}` : `${API_URL}/statistics`;
+      
+      const response = await fetch(url, {
         headers: { 'Authorization': `Bearer ${token}` },
       });
 
@@ -550,7 +658,7 @@ const ProfilePage = ({ token, onLogout }) => {
           
           <div className="stats-card">
             <div className="stats-card-value">
-              {stats?.tasks_completed_rate ? `${(stats.tasks_completed_rate * 100).toFixed(1)}%` : '0%'}
+              {stats?.tasks_completed_rate ? `${stats.tasks_completed_rate.toFixed(1)}%` : '0%'}
             </div>
             <div className="stats-card-title">Completion Rate</div>
           </div>
