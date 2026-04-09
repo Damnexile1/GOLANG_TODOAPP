@@ -11,8 +11,12 @@ type User struct {
 	ID      int
 	Version int
 
-	FullName    string
-	PhoneNumber *string
+	FullName     string
+	PhoneNumber  *string
+	Email        string
+	PasswordHash string
+	Role         UserRole
+	ManagerId    *int
 }
 
 type UserPatch struct {
@@ -20,21 +24,29 @@ type UserPatch struct {
 	PhoneNumber Nullable[string]
 }
 
-func NewUser(id int, version int, fullName string, phoneNumber *string) User {
+func NewUser(id int, version int, fullName string, phoneNumber *string, email string, passwordHash string, role UserRole, managerId *int) User {
 	return User{
-		ID:          id,
-		Version:     version,
-		FullName:    fullName,
-		PhoneNumber: phoneNumber,
+		ID:           id,
+		Version:      version,
+		FullName:     fullName,
+		PhoneNumber:  phoneNumber,
+		Email:        email,
+		PasswordHash: passwordHash,
+		Role:         role,
+		ManagerId:    managerId,
 	}
 }
 
-func NewUserUninitialized(fullName string, phoneNumber *string) User {
+func NewUserUninitialized(fullName string, phoneNumber *string, email string, passwordHash string, role UserRole, managerId *int) User {
 	return NewUser(
 		UninitializedId,
 		UninitializedVersion,
 		fullName,
 		phoneNumber,
+		email,
+		passwordHash,
+		role,
+		managerId,
 	)
 }
 
@@ -70,6 +82,21 @@ func (u *User) Validate() error {
 			return fmt.Errorf("invalid phone number: %s: %w", *u.PhoneNumber, core_errors.ErrInvalidArgument)
 		}
 	}
+
+	// Валидация email
+	if u.Email == "" {
+		return fmt.Errorf("email is required: %w", core_errors.ErrInvalidArgument)
+	}
+	emailRe := regexp.MustCompile(`^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$`)
+	if !emailRe.MatchString(u.Email) {
+		return fmt.Errorf("invalid email format: %s: %w", u.Email, core_errors.ErrInvalidArgument)
+	}
+
+	// Валидация роли
+	if !u.Role.IsValid() {
+		return fmt.Errorf("invalid role: %d: %w", u.Role, core_errors.ErrInvalidArgument)
+	}
+
 	return nil
 }
 

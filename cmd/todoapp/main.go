@@ -8,11 +8,14 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Damnexile1/GOLANG_TODOAPP/internal/core/auth/jwt"
 	core_config "github.com/Damnexile1/GOLANG_TODOAPP/internal/core/config"
 	core_logger "github.com/Damnexile1/GOLANG_TODOAPP/internal/core/logger"
 	"github.com/Damnexile1/GOLANG_TODOAPP/internal/core/repository/postgres/pool/pgx"
 	core_http_middleware "github.com/Damnexile1/GOLANG_TODOAPP/internal/core/transport/http/middleware"
 	core_http_server "github.com/Damnexile1/GOLANG_TODOAPP/internal/core/transport/http/server"
+	auth_service "github.com/Damnexile1/GOLANG_TODOAPP/internal/features/auth/service"
+	auth_transport_http "github.com/Damnexile1/GOLANG_TODOAPP/internal/features/auth/transport/http"
 	statistics_postgres_repository "github.com/Damnexile1/GOLANG_TODOAPP/internal/features/statistics/repository/postgres"
 	statistics_service "github.com/Damnexile1/GOLANG_TODOAPP/internal/features/statistics/service"
 	statistics_transport_http "github.com/Damnexile1/GOLANG_TODOAPP/internal/features/statistics/transport/http"
@@ -30,6 +33,10 @@ import (
 // @title    Golang To do API
 // @version  1.0
 // @BasePath /api/v1
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Type "Bearer" followed by a space and JWT token.
 func main() {
 	cfg := core_config.NewConfigMust()
 	time.Local = cfg.TimeZone
@@ -63,6 +70,14 @@ func main() {
 	usersService := user_service.NewUsersService(usersRepository)
 	usersTransportHTTP := user_transport_http.NewUsersHTTPHandler(usersService)
 
+	logger.Debug("initializing JWT manager")
+	jwtConfig := core_config.NewJWTConfigMust()
+	jwtManager := jwt.NewJWTManager(jwtConfig.SecretKey, jwtConfig.AccessTokenTTL, jwtConfig.RefreshTokenTTL)
+
+	logger.Debug("initializing feature", zap.String("feature", "auth"))
+	authService := auth_service.NewAuthService(usersRepository, jwtManager)
+	authTransportHTTP := auth_transport_http.NewAuthHTTPHandler(authService)
+
 	logger.Debug("initializing feature", zap.String("feature", "tasks"))
 	tasksRepository := tasks_postgres_postgres.NewTasksRepository(pool)
 	tasksService := tasks_service.NewTasksService(tasksRepository)
@@ -85,21 +100,21 @@ func main() {
 		core_http_middleware.Trace(),
 	)
 
-	apiVersionRouterV1 := core_http_server.NewApiVersionRouter(core_http_server.ApiVersion1)
+	// Один роутер для всех endpoints
+	// Auth endpoints - публичные (без middleware)
+	// Остальные endpoints будут защищены через middleware на уровне роутера
+	apiVersionRouterV1 := core_http_server.NewApiVersionRouter(
+		core_http_server.ApiVersion1,
+		core_http_middleware.Auth(jwtManager), // Применяем Auth ко всем, кроме auth endpoints
+	)
+
+	// Регистрируем все routes
+	apiVersionRouterV1.RegisterRoutes(authTransportHTTP.Routes()...)
 	apiVersionRouterV1.RegisterRoutes(usersTransportHTTP.Routes()...)
 	apiVersionRouterV1.RegisterRoutes(tasksTransportHttp.Routes()...)
 	apiVersionRouterV1.RegisterRoutes(statisticsTransportHTTP.Routes()...)
 
-	//apiVersionRouterV2 := core_http_server.NewApiVersionRouter(
-	//	core_http_server.ApiVersion2,
-	//	core_http_middleware.Dummy("api v2 middleware"),
-	//)
-	//apiVersionRouterV2.RegisterRoutes(usersTransportHTTP.Routes()...)
-
-	httpServer.RegisterApiRoutes(
-		apiVersionRouterV1,
-		//apiVersionRouterV2,
-	)
+	httpServer.RegisterApiRoutes(apiVersionRouterV1)
 	httpServer.RegisterSwagger()
 
 	if err := httpServer.Run(ctx); err != nil {

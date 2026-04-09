@@ -23,79 +23,6 @@ definitions:
       value:
         type: string
     type: object
-  github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_types.Nullable-time_Time:
-    properties:
-      set:
-        type: boolean
-      value:
-        type: string
-    type: object
-  internal_features_auth_transport_http.LoginRequest:
-    properties:
-      email:
-        example: user@example.com
-        type: string
-      password:
-        example: password123
-        type: string
-    required:
-    - email
-    - password
-    type: object
-  internal_features_auth_transport_http.LoginResponse:
-    properties:
-      access_token:
-        type: string
-      refresh_token:
-        type: string
-    type: object
-  internal_features_auth_transport_http.RefreshTokenRequest:
-    properties:
-      refresh_token:
-        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-        type: string
-    required:
-    - refresh_token
-    type: object
-  internal_features_auth_transport_http.RefreshTokenResponse:
-    properties:
-      access_token:
-        type: string
-      refresh_token:
-        type: string
-    type: object
-  internal_features_auth_transport_http.RegisterRequest:
-    properties:
-      email:
-        example: user@example.com
-        type: string
-      full_name:
-        example: John Doe
-        maxLength: 100
-        minLength: 3
-        type: string
-      password:
-        example: password123
-        maxLength: 100
-        minLength: 6
-        type: string
-      phone_number:
-        example: "+79999999999"
-        maxLength: 15
-        minLength: 10
-        type: string
-    required:
-    - email
-    - full_name
-    - password
-    type: object
-  internal_features_auth_transport_http.RegisterResponse:
-    properties:
-      access_token:
-        type: string
-      refresh_token:
-        type: string
-    type: object
   internal_features_statistics_transport_http.GetStatisticsResponse:
     properties:
       tasks_average_completion_time:
@@ -117,9 +44,6 @@ definitions:
         example: 1
         minimum: -1
         type: integer
-      deadline:
-        example: "2026-04-05T10:00:00Z"
-        type: string
       description:
         example: Milk, eggs, bread
         maxLength: 1000
@@ -148,18 +72,12 @@ definitions:
       created_at:
         example: "2026-03-29T10:00:00Z"
         type: string
-      deadline:
-        example: "2026-04-05T10:00:00Z"
-        type: string
       description:
         example: Milk, eggs, bread
         type: string
       id:
         example: 1
         type: integer
-      status:
-        example: created
-        type: string
       title:
         example: Buy groceries
         type: string
@@ -181,18 +99,12 @@ definitions:
       created_at:
         example: "2026-03-29T10:00:00Z"
         type: string
-      deadline:
-        example: "2026-04-05T10:00:00Z"
-        type: string
       description:
         example: Milk, eggs, bread
         type: string
       id:
         example: 1
         type: integer
-      status:
-        example: created
-        type: string
       title:
         example: Buy groceries
         type: string
@@ -204,8 +116,6 @@ definitions:
     properties:
       completed:
         $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_types.Nullable-bool'
-      deadline:
-        $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_types.Nullable-time_Time'
       description:
         $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_types.Nullable-string'
       title:
@@ -225,18 +135,12 @@ definitions:
       created_at:
         example: "2026-03-29T10:00:00Z"
         type: string
-      deadline:
-        example: "2026-04-05T10:00:00Z"
-        type: string
       description:
         example: Milk, eggs, bread
         type: string
       id:
         example: 1
         type: integer
-      status:
-        example: created
-        type: string
       title:
         example: Buy groceries
         type: string
@@ -258,18 +162,12 @@ definitions:
       created_at:
         example: "2026-03-29T10:00:00Z"
         type: string
-      deadline:
-        example: "2026-04-05T10:00:00Z"
-        type: string
       description:
         example: Milk, eggs, bread
         type: string
       id:
         example: 1
         type: integer
-      status:
-        example: created
-        type: string
       title:
         example: Buy groceries
         type: string
@@ -364,104 +262,6 @@ info:
   title: Golang To do API
   version: "1.0"
 paths:
-  /auth/login:
-    post:
-      consumes:
-      - application/json
-      description: Авторизует пользователя и возвращает JWT токены
-      parameters:
-      - description: Данные для входа
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/internal_features_auth_transport_http.LoginRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Успешный вход
-          schema:
-            $ref: '#/definitions/internal_features_auth_transport_http.LoginResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse'
-      summary: Вход пользователя
-      tags:
-      - auth
-  /auth/refresh:
-    post:
-      consumes:
-      - application/json
-      description: Обновляет access token используя refresh token
-      parameters:
-      - description: Refresh token
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/internal_features_auth_transport_http.RefreshTokenRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Новые токены
-          schema:
-            $ref: '#/definitions/internal_features_auth_transport_http.RefreshTokenResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse'
-      summary: Обновление токена
-      tags:
-      - auth
-  /auth/register:
-    post:
-      consumes:
-      - application/json
-      description: Регистрирует нового пользователя и возвращает JWT токены
-      parameters:
-      - description: Данные для регистрации
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/internal_features_auth_transport_http.RegisterRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Успешная регистрация
-          schema:
-            $ref: '#/definitions/internal_features_auth_transport_http.RegisterResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/github_com_Damnexile1_GOLANG_TODOAPP_internal_core_transport_http_response.ErrorResponse'
-      summary: Регистрация пользователя
-      tags:
-      - auth
   /statistics:
     get:
       description: Возвращает статистику по задачам с возможностью фильтрации по пользователю
@@ -803,10 +603,4 @@ paths:
       summary: Частичное обновление пользователя
       tags:
       - users
-securityDefinitions:
-  BearerAuth:
-    description: Type "Bearer" followed by a space and JWT token.
-    in: header
-    name: Authorization
-    type: apiKey
 swagger: "2.0"

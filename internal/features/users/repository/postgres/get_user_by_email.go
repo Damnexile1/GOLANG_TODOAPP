@@ -10,9 +10,9 @@ import (
 	core_postgres_pool "github.com/Damnexile1/GOLANG_TODOAPP/internal/core/repository/postgres/pool"
 )
 
-func (r *UsersRepository) GetUser(
+func (r *UsersRepository) GetUserByEmail(
 	ctx context.Context,
-	userId int,
+	email string,
 ) (domain.User, error) {
 	ctx, cancel := context.WithTimeout(ctx, r.pool.OpTimeout())
 	defer cancel()
@@ -20,10 +20,10 @@ func (r *UsersRepository) GetUser(
 	query := `
 	select id, version, full_name, phone_number, email, password_hash, role, manager_id
 	from todoapp.users
-	where id = $1;
+	where email = $1;
 	`
 
-	row := r.pool.QueryRow(ctx, query, userId)
+	row := r.pool.QueryRow(ctx, query, email)
 	var userModel UserModel
 	err := row.Scan(
 		&userModel.ID,
@@ -37,7 +37,7 @@ func (r *UsersRepository) GetUser(
 	)
 	if err != nil {
 		if errors.Is(err, core_postgres_pool.ErrNoRows) {
-			return domain.User{}, fmt.Errorf("user with id=%d not found: %w", userId, core_errors.ErrNotFound)
+			return domain.User{}, fmt.Errorf("user with email=%s not found: %w", email, core_errors.ErrNotFound)
 		}
 		return domain.User{}, fmt.Errorf("scan error: %w", err)
 	}
