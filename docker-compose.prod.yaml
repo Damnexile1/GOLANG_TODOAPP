@@ -1,0 +1,11 @@
+services:
+  frontend:
+    build:
+      context: ${PROJECT_ROOT}/frontend
+      dockerfile: Dockerfile.prod
+    container_name: todoapp-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - todoapp
+    restart: always
